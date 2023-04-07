@@ -17,6 +17,8 @@ resources:
 - repo: self
 
 variables:
+  dockerImageName: '$(Build.Repository.Name):$(tag)'
+  dockerContainerName: 'test-container'
   tag: 'latest'
 
 stages:
@@ -36,8 +38,7 @@ stages:
       inputs:
         command: build
         dockerfile: '**/Dockerfile'
-        tags: |
-          $(tag)
+        tags: $(dockerImageName)
 
 - stage: Test
   displayName: Test Image
@@ -51,13 +52,13 @@ stages:
       name: CreateContainer
       displayName: Create Container from Image
       inputs:
-        script: 'docker run --name centos9s-container -d --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --cgroupns=host docker-centos9s-ansible'
+        script: 'docker run --name $(dockerContainerName) -d --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --cgroupns=host $(dockerImageName)'
         failOnStderr: true
     - task: CmdLine@2
       name: RunCMDinContainer
       displayName: Run command ansible in Container
       inputs:
-        script: 'docker exec --tty centos9s-container env TERM=xterm ansible --version'
+        script: 'docker exec --tty $(dockerContainerName) env TERM=xterm ansible --version'
         failOnStderr: true
 
 - stage: Release
@@ -72,5 +73,4 @@ stages:
       inputs:
         containerRegistry: 'Docker Hub (ZHLZack)'
         command: 'push'
-        tags: |
-          $(Build.Repository.Name):$(tag)
+        tags: $(dockerImageName)
