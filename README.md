@@ -48,7 +48,7 @@ verifier:
   name: ansible
 ```
 
-* Within the root of your project, run the following:
+* With `molecule.yml` configured, run your molecule converge playbook by running the following command:
 ```
 molecule converge
 ```
