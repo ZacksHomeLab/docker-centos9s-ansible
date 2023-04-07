@@ -18,7 +18,7 @@ resources:
 
 variables:
   tag: 'latest'
-  dockerImageName: 'docker-centos9s-ansible:$(tag)'
+  dockerImageName: 'docker-centos9s-ansible'
   dockerContainerName: 'test-container'
 
 stages:
@@ -36,9 +36,9 @@ stages:
     - task: Docker@2
       displayName: Build an image
       inputs:
+        repository: $(dockerImageName)
         command: build
         dockerfile: '**/Dockerfile'
-        tags: $(dockerImageName)
 
 - stage: Test
   displayName: Test Image
@@ -71,6 +71,6 @@ stages:
     steps:
     - task: Docker@2
       inputs:
+        repository: $(dockerImageName)
         containerRegistry: 'Docker Hub (ZHLZack)'
         command: 'push'
-        tags: $(dockerImageName)
