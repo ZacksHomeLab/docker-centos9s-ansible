@@ -1,0 +1,75 @@
+# Docker
+# Build a Docker image
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+schedules:
+- cron: '0 0 * * *'
+  displayName: Midnight Build For Centos9s Ansible Image
+  branches:
+    include:
+    - main
+  always: true
+
+trigger:
+- main
+
+resources:
+- repo: self
+
+variables:
+  tag: 'latest'
+
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName: Build
+    pool: 'Linux'
+    steps:
+    - checkout: self
+      clean: true
+      path: $(Agent.BuildDirectory)
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        command: build
+        dockerfile: '$(Agent.BuildDirectory)/Dockerfile'
+        tags: |
+          $(tag)
+
+- stage: Test
+  displayName: Test Image
+  dependsOn: Build
+  jobs:
+  - job: TestImage
+    displayName: Test Image
+    pool: 'Linux'
+    steps:
+    - task: CmdLine@2
+      name: CreateContainer
+      displayName: Create Container from Image
+      inputs:
+        script: 'docker run --name centos9s-container -d --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --cgroupns=host docker-centos9s-ansible'
+        failOnStderr: true
+    - task: CmdLine@2
+      name: RunCMDinContainer
+      displayName: Run command ansible in Container
+      inputs:
+        script: 'docker exec --tty centos9s-container env TERM=xterm ansible --version'
+        failOnStderr: true
+
+- stage: Release
+  displayName: Push Image
+  dependsOn: Test
+  jobs:
+  - job: PushImage
+    displayName: Push Image to Docker
+    pool: 'Linux'
+    steps:
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'Docker Hub (ZHLZack)'
+        command: 'push'
+        tags: |
+          $(Build.Repository.Name):$(tag)
