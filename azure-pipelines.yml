@@ -29,12 +29,13 @@ stages:
     steps:
     - checkout: self
       clean: true
-      path: $(Agent.BuildDirectory)
+      fetchDepth: 1
+
     - task: Docker@2
       displayName: Build an image
       inputs:
         command: build
-        dockerfile: '$(Agent.BuildDirectory)/Dockerfile'
+        dockerfile: '**/Dockerfile'
         tags: |
           $(tag)
 
