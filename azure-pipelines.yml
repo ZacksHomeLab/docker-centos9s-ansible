@@ -39,6 +39,7 @@ stages:
         repository: $(dockerImageName)
         command: build
         dockerfile: '**/Dockerfile'
+        tags: $(tag)
 
 - stage: Test
   displayName: Test Image
@@ -74,3 +75,4 @@ stages:
         repository: $(dockerImageName)
         containerRegistry: 'Docker Hub (ZHLZack)'
         command: 'push'
+        tags: $(tag)
