@@ -17,9 +17,9 @@ resources:
 - repo: self
 
 variables:
-  dockerImageName: '$(Build.Repository.Name):$(tag)'
-  dockerContainerName: 'test-container'
   tag: 'latest'
+  dockerImageName: 'docker-centos9s-ansible:$(tag)'
+  dockerContainerName: 'test-container'
 
 stages:
 - stage: Build
