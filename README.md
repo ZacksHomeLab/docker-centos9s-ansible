@@ -19,8 +19,8 @@ docker run --detach --privileged --cgroupns=host -ti --volume=/sys/fs/cgroup:/sy
 NOTE: For individuals using WSL2 (Ubuntu 20.04), you may need to run the following commands on your WSL2 instance to get systemd to work:
 
 ```
-sudo apt-get update && sudo apt-get install -yqq daemonize dbus-user-session
-sudo daemonize /usr/bin/unshare --fork --pid --mount-proc /lib/systemd/systemd --system-unit=basic.target
+sudo apt-get update && sudo apt-get install -yqq daemonize dbus-user-session && \
+sudo daemonize /usr/bin/unshare --fork --pid --mount-proc /lib/systemd/systemd --system-unit=basic.target && \
 exec sudo nsenter -t $(pidof systemd) -a su - $LOGNAME
 ```
 
